@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEFAULT_FILE_TO_READ "config"
+#define DEFAULT_FILE_TO_READ "~/.ssh/config"
 #define LINE_MAX 255
 
 struct config_item {
@@ -11,6 +11,7 @@ struct config_item {
 
 int start_with(const char *check_string, const char *search_string);
 void read_config(const char *filename, struct config_item *config);
+// int test_ssh_exist();
 
 int main(int argc, char *argv[]) {
 	const char *filename = DEFAULT_FILE_TO_READ;
@@ -24,12 +25,11 @@ int main(int argc, char *argv[]) {
 	// Parse the full list and show it to stdout
 	struct config_item config[128];
 	read_config(filename, config);
-	// Ask for the choice
 	int choice;
 	printf("Choose the server to connect [close with ctrl+c]: ");
 	scanf("%d", &choice);
 	printf("You choosed %d %s server... Connecting soon.\n", choice, config[choice].host);
-	// run the connecting command, ssh will do the rest
+	// ssh will do the rest
 	char command[128];
 	snprintf(command, sizeof(command), "/usr/bin/ssh %s", config[choice].host);
 	system(command);
