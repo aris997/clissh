@@ -1,0 +1,60 @@
+# CliSSH
+
+A simple `config` reader that stdout the list of Hosts available
+and then ask to which of the hosts to run the ssh command. 
+
+## Installation
+
+You may compile it with `gcc` or run the command `make`.
+Once the binary is ready you should grant it the executable
+permission with the command:
+
+```shell
+chmod +x clissh
+```
+
+and then move it to a suitable folder where the shell can call it.
+I moved the binary to the `~/.local/bin/` folder with
+
+```shell
+mv clissh ~/.local/bin
+```
+
+### Warning
+
+This is a very early program, I like programming and so you should too.
+Take this simple program as an experiment, you can read the source
+C code from the file. License should be MIT.
+I also use Claude to add arguments to the program, it helped me uravel
+the argc argv managing.
+
+> Use it at your risk.
+
+## Usage
+
+### Specify config file
+
+```shell
+clissh -f /path/to/config
+```
+
+this way you can specify the file to read.
+
+### Edit the config file
+
+Yo may want to edit the config file, to do so you can run the 
+following command: 
+
+```shell
+clissh --edit
+```
+
+and it will open the ~/.ssh/config file with the configured $EDITOR.
+
+#### Combine options
+
+You can specify a config file and edit it just combining the two options.
+
+---
+
+Last edit: 12 feb 2026
