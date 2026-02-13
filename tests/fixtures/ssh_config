@@ -1,0 +1,11 @@
+Host server1
+    HostName 192.168.1.1
+    User admin
+
+Host server2
+    HostName 192.168.1.2
+    User root
+
+Host myserver
+    HostName example.com
+    User deploy
