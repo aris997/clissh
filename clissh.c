@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEFAULT_FILE_TO_READ "~/.ssh/config"
 #define LINE_MAX 255
 
 struct config_item {
@@ -10,11 +9,18 @@ struct config_item {
 };
 
 int start_with(const char *check_string, const char *search_string);
-void read_config(const char *filename, struct config_item *config);
-// int test_ssh_exist();
+int read_config(const char *filename, struct config_item *config);
 
 int main(int argc, char *argv[]) {
-	const char *filename = DEFAULT_FILE_TO_READ;
+	char default_path[256];
+	const char *home = getenv("HOME");
+	if (home == NULL) {
+		printf("Error: HOME environment variable not set\n");
+		return 1;
+	}
+	snprintf(default_path, sizeof(default_path), "%s/.ssh/config", home);
+	const char *filename = default_path;
+	int edit_mode = 0;
 	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
 			filename = argv[i + 1];
@@ -24,12 +30,28 @@ int main(int argc, char *argv[]) {
 	}
 	// Parse the full list and show it to stdout
 	struct config_item config[128];
-	read_config(filename, config);
-	int choice;
-	printf("Choose the server to connect [close with ctrl+c]: ");
-	scanf("%d", &choice);
-	printf("You choosed %d %s server... Connecting soon.\n", choice, config[choice].host);
-	// ssh will do the rest
+	int count = read_config(filename, config);
+	// Ask for the choice
+	char input[32];
+	printf("Choose the server to connect [c to close]: ");
+	if (fgets(input, sizeof(input), stdin) == NULL) {
+		return 0;
+	}
+	// Remove trailing newline
+	input[strcspn(input, "\n")] = '\0';
+	// Check for cancel
+	if (strcmp(input, "c") == 0) {
+		return 0;
+	}
+	// Try to parse as a number
+	char *endptr;
+	long choice = strtol(input, &endptr, 10);
+	if (*endptr != '\0' || choice < 1 || choice > count) {
+		printf("Unrecognized host, closing\n");
+		return 1;
+	}
+	printf("You choosed %ld %s server... Connecting soon.\n", choice, config[choice].host);
+	// run the connecting command, ssh will do the rest
 	char command[128];
 	snprintf(command, sizeof(command), "/usr/bin/ssh %s", config[choice].host);
 	system(command);
@@ -45,11 +67,11 @@ int start_with(const char *check_string, const char *search_string) {
 	return 0;
 }
 
-void read_config(const char *filename, struct config_item *config) {
+int read_config(const char *filename, struct config_item *config) {
 	FILE *file = fopen(filename, "r");
 	if (file == NULL) {
 		printf("Error: Could not open file %s\n", filename);
-		return;
+		return 0;
 	}
 
 	char line_buf[LINE_MAX];
@@ -69,5 +91,5 @@ void read_config(const char *filename, struct config_item *config) {
 		}
 	}
 	fclose(file);
-	// return config;
+	return i;
 }
