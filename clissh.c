@@ -26,7 +26,24 @@ int main(int argc, char *argv[]) {
 			filename = argv[i + 1];
 			printf("Loading given filename: %s", filename);
 			i++;
+		} else if (strcmp(argv[i], "--edit") == 0) {
+			edit_mode = 1;
+		} else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
+			printf("Usage: clissh [options]\n");
+			printf("  -f <file>   Use a custom SSH config file (default: ~/.ssh/config)\n");
+			printf("  --edit      Open the config file with $EDITOR\n");
+			printf("  -h, --help  Show this help message\n");
+			return 0;
 		}
+	}
+	if (edit_mode) {
+		const char *editor = getenv("EDITOR");
+		if (editor == NULL) {
+			editor = "vi";
+		}
+		char command[256];
+		snprintf(command, sizeof(command), "%s %s", editor, filename);
+		return system(command);
 	}
 	// Parse the full list and show it to stdout
 	struct config_item config[128];
